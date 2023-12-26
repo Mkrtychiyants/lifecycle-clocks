@@ -1,11 +1,11 @@
-import React, { Component } from 'react'
+import React, { Component, createRef } from 'react'
 import WorldClock from './WorldClock';
-type MyState = { visible: boolean, nameRef: any, zoneRef: any, clocks: any };
+type MyState = { visible: boolean, clocks: any };
 
 export interface IClock {
     id: number,
-    clockName: string,
-    clockZone: string,
+    clockName?: string,
+    clockZone?: number,
     active: boolean,
     date: Date,
 }
@@ -15,8 +15,6 @@ export default class ClockDesk extends React.Component<{}, MyState> {
         super(props);
         this.state = {
             visible: false,
-            nameRef: React.createRef(),
-            zoneRef: React.createRef(),
             clocks: [{
                 id: 10,
                 clockName: "moscow",
@@ -27,52 +25,44 @@ export default class ClockDesk extends React.Component<{}, MyState> {
             {
                 id: 11,
                 clockName: "ny",
-                clockZone: "1",
+                clockZone: 8,
                 active: true,
                 date: Date.now()
             },
-            {
-                id: 11,
-                clockName: "ny",
-                clockZone: "1",
-                active: true,
-                date: Date.now()
-            }
             ]
         }
     }
+    nameRef = React.createRef<HTMLInputElement>();
+    zoneRef = React.createRef<HTMLInputElement>();
+
     clockStart = () => {
-        const newClock: IClock = {
-            id: Math.floor(Math.random() * 100),
-            clockName: this.state.nameRef.current.value,
-            clockZone: this.state.zoneRef.current.value,
-            active: true,
-            date: new Date()
-        }
-        // this.setState(prevState =>({
-        //     ...prevState,   
-        //     clocks: prevState.clocks.splice(1, 0, newClock),
-        // }))
-        // this.setState(prevState =>({     
-        //     clocks: prevState.clocks.splice(1, 0, newClock),
-        // }))
-        // this.setState({
-        //     clocks: this.state.clocks.splice(1, 0, newClock),
-        // }
+
         this.setState({
-                clocks: this.state.clocks.splice(1, 0, newClock),
-            })
-        // this.state.clocks.splice(1, 0, newClock);
-        console.log( this.state.clocks)
+            visible: false,
+            clocks: [...this.state.clocks,
+
+            {
+                id: Math.floor(Math.random() * 100),
+                clockName: this.nameRef?.current?.value,
+                clockZone: this.zoneRef?.current?.value,
+                active: true,
+                date: new Date(Date.now())
+            }
+
+            ]
+        })
+
+        console.log(this.state.clocks)
 
     }
-    clockEnd = () => {
-
+    clockEnd = (id: number): void => {
+        this.setState({
+            clocks: this.state.clocks.filter((item: any) => item.id !== id),
+        });
 
     }
     componentDidMount(): void {
         console.log("New mount clockdesk");
-       
     }
     render() {
 
@@ -82,27 +72,27 @@ export default class ClockDesk extends React.Component<{}, MyState> {
                     id='clockName'
                     className='clockNameInput'
                     type="text"
-                    ref={this.state.nameRef}
+                    ref={this.nameRef}
                 />
                 <label htmlFor="clockName" className='clockNameLable'>Название</label>
                 <input
                     id='clockZone'
                     className='clockZoneInput'
                     type="text"
-                    ref={this.state.zoneRef}
+                    ref={this.zoneRef}
                 />
                 <label htmlFor="clockZone" className='clockZoneInput'>Временная зона</label>
 
                 <button onClick={this.clockStart}>Добавить</button>
-                {/* <ul className='clockList'>
+                <ul className='clockList'>
                     {this.state.clocks.map((item: IClock) => (
                         <WorldClock
                             key={item.id}
                             item={item}
-                            remove={this.clockEnd}
+                            remove={() => this.clockEnd(item.id)}
                         />
                     ))}
-                </ul> */}
+                </ul>
             </div>
 
         )
